@@ -1,10 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"io"
 	"log"
-	"time"
+	"os"
 
 	pb "../proto2"
 	"google.golang.org/grpc"
@@ -34,29 +35,23 @@ func main() {
 		return
 	}
 
-	waitc := make(chan struct{})
-	go func() {
-		for {
-			in, err := stream.Recv()
-			if err == io.EOF {
-				close(waitc)
-				return
-			}
-			if err != nil {
-				log.Fatalf("エラー: %v", err)
-			}
-			log.Printf("サーバから：%s", in.Message)
+	stdin := bufio.NewScanner(os.Stdin)
 
-			// お返し
-			stream.Send(&pb.HelloRequest{
-				Name: time.Now().Format("2006-01-02 15:04:05"),
-			})
+	for {
+		in, err := stream.Recv()
+		if err == io.EOF {
+			break
 		}
-	}()
-	<-waitc
+		if err != nil {
+			log.Fatalf("エラー: %v", err)
+		}
+		log.Printf("サーバから：%s", in.Message)
 
-	if err != nil {
-		return
+		// お返し
+		stdin.Scan()
+		cmd := stdin.Text()
+		stream.Send(&pb.HelloRequest{Name: cmd})
 	}
+
 	stream.CloseSend()
 }
