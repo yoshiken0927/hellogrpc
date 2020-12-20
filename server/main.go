@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net"
+
 	"google.golang.org/grpc"
 
 	pb "../proto"
@@ -22,15 +23,15 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 
 func main() {
 	// リッスン処理
-	 lis, err := net.Listen("tcp", port)
-	 if err != nil {
-			 log.Fatalf("failed to listen: %v", err)
-	 }
+	lis, err := net.Listen("tcp", port)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
 
-	 // サーバ起動
-	 s := grpc.NewServer()
-	 pb.RegisterGreeterServer(s, &server{})
-	 if err := s.Serve(lis); err != nil {
-			 log.Fatalf("failed to serve: %v", err)
-	 }
+	// サーバ起動
+	s := grpc.NewServer()
+	pb.RegisterGreeterServer(s, &server{})
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }
